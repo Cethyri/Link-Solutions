@@ -13,7 +13,8 @@ Import-Module .\Helper\Functions.ps1 -Force
 foreach ($syncProfile in $config.syncProfiles) {
 	$sourcePath = Join-Path -Path $config.sourceSolutionPath -ChildPath $syncProfile.sourceChildPath
 	$linkPath = Join-Path -Path $config.linkSolutionPath -ChildPath $syncProfile.linkChildPath
-	$noFilter = [string]::IsNullOrEmpty($syncProfile.filter)
+	$syncProfile.doFilter = ![string]::IsNullOrEmpty($syncProfile.filter)
+	$syncProfile.doAvoid = ![string]::IsNullOrEmpty($syncProfile.avoid)
 	
 	if (!(Test-SourcePath $sourcePath) -or !(Test-LinkPath $linkPath)) {
 		continue
@@ -29,15 +30,15 @@ foreach ($syncProfile in $config.syncProfiles) {
 	$linkFiles = Get-ChildItem $linkPath
 	$linkRegexPath = $linkPath -replace '\\', '\\'
 	
-	Add-LinkProfiles $sourceFiles $linkProfiles $syncProfile.sourceChildPath $sourceRegexPath $noFilter $syncProfile.filter
-	Add-LinkProfiles $linkFiles $linkProfiles $syncProfile.linkChildPath $linkRegexPath $noFilter $syncProfile.filter $true
+	Add-LinkProfiles $sourceFiles $linkProfiles $syncProfile.sourceChildPath $sourceRegexPath $syncProfile
+	Add-LinkProfiles $linkFiles $linkProfiles $syncProfile.linkChildPath $linkRegexPath $syncProfile $true
 	$lists = @{ }
 
 	Show-Summary $linkProfiles $lists $sourcePath $linkPath $config.showSummary
 	
 	if (!$config.confirmBeforeLink -or (Read-Bool("Do you want to finish the operation?"))) {
 		New-Links $lists $sourcePath $linkPath
-		if($config.confirmResults) {
+		if ($config.confirmResults) {
 			Read-Host -Prompt "Press a key to continue"
 		}
 	}

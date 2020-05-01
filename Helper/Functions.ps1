@@ -35,8 +35,10 @@ function global:New-Profile ([System.IO.FileSystemInfo] $file, [string] $relPath
 	}
 }
 
-function global:Get-ShouldInclude ([System.IO.FileSystemInfo] $file, [bool] $isDirectory, [bool] $noFilter, [string] $filter, [LinkAction] $dirAction) {
-	return ($noFilter -or $isDirectory -or ($file.Name -like $filter)) -and ($dirAction -ne [LinkAction]::exclude) -and ($dirAction -ne [LinkAction]::avoid)
+function global:Get-ShouldInclude ([System.IO.FileSystemInfo] $file, [bool] $isDirectory, [hashtable] $syncProfile, [LinkAction] $dirAction) {
+	$filter = !$syncProfile.doFilter -or $file.Name -like $syncProfile.filter
+	$action = ($dirAction -ne [LinkAction]::exclude) -and ($dirAction -ne [LinkAction]::avoid)
+	return ($isDirectory -or $filter) -and $action
 }
 
 enum LinkAction {
@@ -76,7 +78,7 @@ function global:Read-LinkAction ([string] $fileName, [bool] $isDirectory) {
 	return $input -eq $trueVal
 }
 
-function global:Add-LinkProfiles ([System.IO.FileSystemInfo[]] $files, [hashtable] $linkProfiles, [string] $childPath, [string] $regexPath, [bool] $noFilter, [string] $filter, [bool] $inLinkDirectory = $false) {
+function global:Add-LinkProfiles ([System.IO.FileSystemInfo[]] $files, [hashtable] $linkProfiles, [string] $childPath, [string] $regexPath, [hashtable] $syncProfile, [bool] $inLinkDirectory = $false) {
 	for ($i = 0; $i -lt $files.Length; ++$i) {
 		$file = $files[$i]
 		$isDirectory = ($file -is [System.IO.DirectoryInfo])
@@ -84,12 +86,17 @@ function global:Add-LinkProfiles ([System.IO.FileSystemInfo[]] $files, [hashtabl
 		$relPath = $file.FullName -replace $regexPath, ''
 		$relDirPath = (Split-Path $relPath)
 		
-		$include = Get-ShouldInclude $file $isDirectory $noFilter $filter $linkProfiles[$relDirPath].action
+		$include = Get-ShouldInclude $file $isDirectory $syncProfile $linkProfiles[$relDirPath].action
 		
 		if ($include) {
+			$avoid = $syncProfile.doAvoid -and $file.name -like $syncProfile.avoid
+			if ($avoid) {
+				$include = $false
+			}
 			if (!$linkProfiles.Contains($relPath)) {
 				$linkProfiles[$relPath] = New-Profile $file $relPath
-				if ($inLinkDirectory) {
+				
+				if (!$avoid -and $inLinkDirectory) {
 					if ($config.avoidByDefault) {
 						$linkProfiles[$relPath].action = [LinkAction]::avoid
 					}
@@ -97,10 +104,6 @@ function global:Add-LinkProfiles ([System.IO.FileSystemInfo[]] $files, [hashtabl
 						$linkProfiles[$relPath].action = Read-LinkAction (Join-Path -Path $childPath -ChildPath $relPath) $isDirectory
 					}
 					$include = $linkProfiles[$relPath].action -eq [LinkAction]::include
-
-					if (!$include) {
-						$linkProfiles[$relPath].action = [LinkAction]::avoid
-					}
 				}
 			}
 			
@@ -121,7 +124,10 @@ function global:Add-LinkProfiles ([System.IO.FileSystemInfo[]] $files, [hashtabl
 
 function global:Invoke-Unlink ([hashtable] $linkProfiles, [string] $relPath) {
 	$dirPath = $relPath
-	while($dirPath -ne '\') {
+	if ($linkProfiles.Contains($relPath)) {
+		$linkProfiles[$relPath].action = [LinkAction]::avoid
+	}
+	while ($dirPath -ne '\') {
 		$dirPath = (Split-Path $dirPath)
 		$linkProfiles[$dirPath].action = [LinkAction]::none
 	}
@@ -196,8 +202,6 @@ function global:New-Links([hashtable] $lists, [string] $sourcePath, [string] $li
 	foreach ($profile in $lists.link) {
 		$linkItemPath = (Join-Path -Path $linkPath -ChildPath $profile.relPath)
 		$targetPath = (Join-Path -Path $sourcePath -ChildPath $profile.relPath)
-
-		Write-ColorInfo (Test-Path 'Y:\TFS\Enterprise-PlatformClassic\Config\Platform\WebControls\DatePicker\DatePickerConfig.xml') "Cyan" "Continue"
 
 		if ((Test-Path $linkItemPath)) {
 			if ((Get-Item $linkItemPath).LinkType -ne "SymbolicLink") {

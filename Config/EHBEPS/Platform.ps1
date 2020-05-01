@@ -29,5 +29,6 @@ $config.syncProfiles = @(
 		sourceChildPath = "Config\Platform"
 		linkChildPath   = "Config\Platform"
 		filter          = ""
+		avoid			= "*.token"
 	}
 )
