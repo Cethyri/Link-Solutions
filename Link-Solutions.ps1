@@ -4,11 +4,11 @@ Import-Module .\Config\BaseConfig.ps1 -Force
 Import-Module $configFilePath -Force
 Import-Module .\Helper\Functions.ps1 -Force
 
-# if (!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
-# {
-#     Write-Warning "You do not have Administrator rights to run this script! Please re-run this script as an Administrator!"
-#     break
-# }
+if (!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
+{
+    Write-Warning "You do not have Administrator rights to run this script! Please re-run this script as an Administrator!"
+    break
+}
 
 foreach ($syncProfile in $config.syncProfiles) {
 	$sourcePath = Join-Path -Path $config.sourceSolutionPath -ChildPath $syncProfile.sourceChildPath
