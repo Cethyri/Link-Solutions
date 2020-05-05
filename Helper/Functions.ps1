@@ -31,9 +31,10 @@ function global:Test-LinkPath([string] $linkPath) {
 
 function global:New-Profile ([System.IO.FileSystemInfo] $file, [string] $relPath) {
 	return @{
-		file    = $file
-		relPath = $relPath
-		action  = [LinkAction]::link
+		file      = $file
+		relPath   = $relPath
+		action    = [LinkAction]::link
+		fileCount = 0
 	}
 }
 
@@ -65,28 +66,35 @@ function global:Read-Bool ([string] $message) {
 function global:Read-LinkAction ([string] $fileName, [bool] $isDirectory) {
 	$input = ""
 	$infoType = if ($isDirectory) { 'folder and its contents' } else { 'file' }
+	$result = $null
 
-	$message = "`"$($fileName)`" is not in the source files. What would you like to do?`nInclude (i) and copy the $($infoType) to the source directory.`nExclude (e) and delete the $($infoType).`nAvoid   (a) linking this $($infoType) by modifying the link targets."
-	while ($input -ne "i" -and $input -ne "e" -and $input -ne "a") {
-		Write-ColorInfo $message "Blue" "Continue"
+	while ($null -eq $result) {
+		Write-ColorInfo "`"$($fileName)`" is not in the source files. What would you like to do?" "Blue" "Continue"
+		Write-ColorInfo "(i) Include and copy the $($infoType) to the source directory." "Blue" "Continue"
+		Write-ColorInfo "(e) Exclude and delete the $($infoType)." "Blue" "Continue"
+		Write-ColorInfo "(a) Avoid linking this $($infoType) by modifying the link targets." "Blue" "Continue"
+		if ($isDirectory) {
+			Write-ColorInfo "(n) Avoid linking this folder, but still consider it's contents" "Blue" "Continue"
+		}
 		$input = Read-Host
+		switch ($input) {
+			'i' { $result = [LinkAction]::include }
+			'e' { $result = [LinkAction]::exclude }
+			'a' { $result = [LinkAction]::avoid }
+			'n' { $result = if ($isDirectory) { [LinkAction]::none } else { $null } }
+			default { $result = $null }
 	}
-
-	switch ($input) {
-		'i' { return [LinkAction]::include }
-		'e' { return [LinkAction]::exclude }
-		'a' { return [LinkAction]::avoid }
 	}
-	return $input -eq $trueVal
+	return $result
 }
 
 function global:Add-LinkProfiles ([System.IO.FileSystemInfo[]] $files, [hashtable] $linkProfiles, [string] $childPath, [string] $regexPath, [hashtable] $syncProfile, [bool] $inLinkDirectory = $false) {
 	for ($i = 0; $i -lt $files.Length; ++$i) {
 		$file = $files[$i]
-		$isDirectory = ($file -is [System.IO.DirectoryInfo])
+		$isDirectory = $file -is [System.IO.DirectoryInfo]
 		
 		$relPath = $file.FullName -replace $regexPath, ''
-		$relDirPath = (Split-Path $relPath)
+		$relDirPath = Split-Path $relPath
 		
 		$include = Get-ShouldInclude $file $isDirectory $syncProfile $linkProfiles[$relDirPath].action
 		
@@ -104,6 +112,10 @@ function global:Add-LinkProfiles ([System.IO.FileSystemInfo[]] $files, [hashtabl
 					}
 					else {
 						$linkProfiles[$relPath].action = Read-LinkAction (Join-Path -Path $childPath -ChildPath $relPath) $isDirectory
+
+						if ($linkProfiles[$relPath].action -eq [LinkAction]::none) {
+							$files += Get-ChildItem $file.FullName
+						}
 					}
 					$include = $linkProfiles[$relPath].action -eq [LinkAction]::include
 				}
@@ -113,6 +125,7 @@ function global:Add-LinkProfiles ([System.IO.FileSystemInfo[]] $files, [hashtabl
 				if ($isDirectory) {
 					$files += Get-ChildItem $file.FullName
 				}
+				$linkProfiles[$relDirPath].fileCount++
 			}
 			else {
 				Invoke-Unlink $linkProfiles $relPath
@@ -130,7 +143,7 @@ function global:Invoke-Unlink ([hashtable] $linkProfiles, [string] $relPath) {
 		$linkProfiles[$relPath].action = [LinkAction]::avoid
 	}
 	while ($dirPath -ne '\') {
-		$dirPath = (Split-Path $dirPath)
+		$dirPath = Split-Path $dirPath
 		$linkProfiles[$dirPath].action = [LinkAction]::none
 	}
 }
@@ -179,7 +192,10 @@ function global:Show-Summary([hashtable] $linkProfiles, [hashtable] $lists, [str
 
 	Write-ColorInfo 'Avoiding:' "White" $infoAction
 	foreach ($profile in $linkProfiles.Values) {
-		if ($profile.action -eq [LinkAction]::avoid) {
+		$relDirPath = Split-Path $profile.relPath
+		$isTopAvoid = $linkProfiles[$relDirPath].fileCount -gt 0
+		$canAvoid = $profile.action -eq [LinkAction]::avoid -or $profile.action -eq [LinkAction]::none
+		if ($canAvoid -and $isTopAvoid) {
 			$lists.avoid += $profile
 			Write-ColorInfo ("    " + $profile.relPath) "Yellow" $infoAction
 		}
