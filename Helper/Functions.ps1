@@ -149,51 +149,31 @@ function global:Invoke-Unlink ([hashtable] $linkProfiles, [string] $relPath) {
 	}
 }
 
-function global:Show-Summary([hashtable] $linkProfiles, [hashtable] $lists, [string] $sourcePath, [string] $linkPath, [bool] $showSummary) {
-	if ($showSummary) {
-		$infoAction = "Continue"
-	}
-	else {
-		$infoAction = "SilentlyContinue"
+function global:Get-ActionLists([hashtable] $linkProfiles) {
+	$lists = @{
+		link    = @()
+		include = @()
+		exclude = @()
+		avoid   = @()
 	}
 
-	$message = "----------Summary----------`nSource: $($sourcePath)`nLink: $($linkPath)`n"
-	Write-ColorInfo $message "Green" $infoAction
-	
-	$lists.link = @()
-	$lists.include = @()
-	$lists.exclude = @()
-	$lists.avoid = @()
-	
-	Write-ColorInfo 'Linking:' "White" $infoAction
 	foreach ($profile in $linkProfiles.Values) {
-		$isTopLink = ($profile.relPath -eq '\') -or $linkProfiles[(Split-Path $profile.relPath)].action -eq [LinkAction]::none
+		$relDirPath = Split-Path $profile.relPath
+
+		$isTopLink = ($profile.relPath -eq '\') -or $linkProfiles[$relDirPath].action -eq [LinkAction]::none
 		$shouldLink = ($profile.action -eq [LinkAction]::link -or $profile.action -eq [LinkAction]::include)
 		if ($shouldLink -and $isTopLink) {
 			$lists.link += $profile
-			Write-ColorInfo ("    " + $profile.relPath) "Blue" $infoAction
 		}
-	}
-	if (!$config.avoidByDefault) {
-		Write-ColorInfo 'Including:' "White" $infoAction
-		foreach ($profile in $linkProfiles.Values) {
+
 			if ($profile.action -eq [LinkAction]::include) {
 				$lists.include += $profile
-				Write-ColorInfo ("    " + $profile.relPath) "Green" $infoAction
 			}
-		}
-		Write-ColorInfo 'Excluding:' "White" $infoAction
-		foreach ($profile in $linkProfiles.Values) {
+
 			if ($profile.action -eq [LinkAction]::exclude) {
 				$lists.exclude += $profile
-				Write-ColorInfo ("    " + $profile.relPath) "Red" $infoAction
-			}
-		}
 	}
 
-	Write-ColorInfo 'Avoiding:' "White" $infoAction
-	foreach ($profile in $linkProfiles.Values) {
-		$relDirPath = Split-Path $profile.relPath
 		$isTopAvoid = $linkProfiles[$relDirPath].fileCount -gt 0
 		$canAvoid = $profile.action -eq [LinkAction]::avoid -or $profile.action -eq [LinkAction]::none
 		if ($canAvoid -and $isTopAvoid) {
@@ -202,9 +182,36 @@ function global:Show-Summary([hashtable] $linkProfiles, [hashtable] $lists, [str
 		}
 	}
 
-	Write-Information "`n" -InformationAction $infoAction
+	$lists.link    = $lists.link    | Sort-Object { $_.relPath }
+	$lists.include = $lists.include | Sort-Object { $_.relPath }
+	$lists.exclude = $lists.exclude | Sort-Object { $_.relPath }
+	$lists.avoid   = $lists.avoid   | Sort-Object { $_.relPath }
+
+	return $lists
 }
 
+function global:Show-Summary([hashtable] $lists, [string] $sourcePath, [string] $linkPath) {
+	Write-ColorInfo "----------Summary----------" "Green"
+	Write-ColorInfo "Source: $($sourcePath)" "Green"
+	Write-ColorInfo "Link: $($linkPath)" "Green"
+	Write-ColorInfo "`n"
+
+	Show-List $lists.link    'Linking:'   'Blue'
+	Show-List $lists.include 'Including:' 'Green'
+	Show-List $lists.exclude 'Excluding:' 'Red'
+	Show-List $lists.avoid   'Avoiding:'  'Yellow'
+
+	Write-Information "`n" -InformationAction
+}
+
+function global:Show-List([hashtable[]] $list, [string] $label, [ConsoleColor] $color) {
+	if ($list.Length -gt 0) {
+		Write-ColorInfo $label
+		foreach ($profile in $lists.avoid) {
+			Write-ColorInfo ("    " + $profile.relPath) $color
+		}
+	}
+}
 
 function global:New-Links([hashtable] $lists, [string] $sourcePath, [string] $linkPath) {
 	foreach ($profile in $lists.include) {

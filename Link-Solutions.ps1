@@ -34,9 +34,12 @@ foreach ($linkProfile in $config.linkProfiles) {
 	
 	Add-LinkProfiles $sourceFiles $linkProfiles $linkProfile.sourceChildPath $sourceRegexPath $linkProfile
 	Add-LinkProfiles $linkFiles $linkProfiles $linkProfile.linkChildPath $linkRegexPath $linkProfile $true
-	$lists = @{ }
 
-	Show-Summary $linkProfiles $lists $sourcePath $linkPath $config.showSummary
+	$lists = Get-ActionLists $linkProfiles
+
+	if ($config.showSummary) {
+		Show-Summary $lists $sourcePath $linkPath
+	}
 	
 	if (!$config.confirmBeforeLink -or (Read-Bool("Do you want to finish the operation?"))) {
 		New-Links $lists $sourcePath $linkPath
