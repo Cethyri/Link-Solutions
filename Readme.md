@@ -1,4 +1,5 @@
 # Link-Solutions
+
 ## Summary
 
 This project is intended to solve the problem of working on multiple files across multiple solutions. Specifically it was built for **EHBEPS** and **EPSCore**, but it can be expanded via config. The script uses <u>symbolic links</u> to ensure shared content is synced across every project. You could use this for working on webpages used as content in other projects, or syncing dlls immediatly after you build a dependancy.
@@ -38,7 +39,7 @@ There are two configuration files needed to run the **Link-Solutions.ps1** scrip
 
 		- `[bool] confirmResults`  
 			`$true` pauses to view the output of <u>symlink</u> creation before moving on to the next <u>link profile</u>.  
-			`$false` does not pause between <u>link profiles</u>.
+			`$false` does not pause between the output of each <u>link profile</u>.
 
 		- `[bool] showSummary`  
 			`$true` shows the summary of files to be <u>linked</u>, <u>included</u>, <u>excluded</u>, or <u>avoided</u>.  
