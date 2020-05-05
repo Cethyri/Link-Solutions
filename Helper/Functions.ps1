@@ -19,7 +19,7 @@ function global:Test-LinkPath([string] $linkPath) {
 		if (!$whatIf) {
 			New-Item -ItemType SymbolicLink -Path $linkPath -Target $sourcePath
 		}
-		Write-ColorInfo "Symbolic link created at `"$($linkItemPath)`", linked to `"$($targetPath)`"." "Blue" "Continue"
+		Write-ColorInfo "Symbolic link created at `"$($linkItemPath)`", linked to `"$($targetPath)`"." 'Blue'
 		return $false
 	}
 	# else {
@@ -58,7 +58,7 @@ function global:Read-Bool ([string] $message) {
 	$input = ""
 
 	while ($input -ne 'y' -and $input -ne 'n') {
-		Write-ColorInfo ($message + " yes (y) or no (n)") "Blue" "Continue"
+		Write-ColorInfo ($message + " yes (y) or no (n)") 'Blue'
 		$input = Read-Host
 	}
 
@@ -71,12 +71,12 @@ function global:Read-LinkAction ([string] $fileName, [bool] $isDirectory) {
 	$result = $null
 
 	while ($null -eq $result) {
-		Write-ColorInfo "`"$($fileName)`" is not in the source files. What would you like to do?" "Blue" "Continue"
-		Write-ColorInfo "(i) Include and copy the $($infoType) to the source directory." "Blue" "Continue"
-		Write-ColorInfo "(e) Exclude and delete the $($infoType)." "Blue" "Continue"
-		Write-ColorInfo "(a) Avoid linking this $($infoType) by modifying the link targets." "Blue" "Continue"
+		Write-ColorInfo "`"$($fileName)`" is not in the source files. What would you like to do?" 'Blue'
+		Write-ColorInfo "(i) Include and copy the $($infoType) to the source directory." 'Blue'
+		Write-ColorInfo "(e) Exclude and delete the $($infoType)." 'Blue'
+		Write-ColorInfo "(a) Avoid linking this $($infoType) by modifying the link targets." 'Blue'
 		if ($isDirectory) {
-			Write-ColorInfo "(n) Avoid linking this folder, but still consider it's contents" "Blue" "Continue"
+			Write-ColorInfo "(n) Avoid linking this folder, but still consider it's contents" 'Blue'
 		}
 		$input = Read-Host
 		switch ($input) {
@@ -182,7 +182,6 @@ function global:Get-ActionLists([hashtable] $linkProfiles) {
 		$canAvoid = $profile.action -eq [LinkAction]::avoid -or $profile.action -eq [LinkAction]::none
 		if ($canAvoid -and $isTopAvoid) {
 			$lists.avoid += $profile
-			Write-ColorInfo ("    " + $profile.relPath) "Yellow" $infoAction
 		}
 	}
 
@@ -195,24 +194,24 @@ function global:Get-ActionLists([hashtable] $linkProfiles) {
 }
 
 function global:Show-Summary([hashtable] $lists, [string] $sourcePath, [string] $linkPath) {
-	Write-ColorInfo "----------Summary----------" "Green"
-	Write-ColorInfo "Source: $($sourcePath)" "Green"
-	Write-ColorInfo "Link: $($linkPath)" "Green"
-	Write-ColorInfo "`n"
+	Write-ColorInfo "----------Summary----------" 'Green'
+	Write-ColorInfo "Source: $($sourcePath)" 'Green'
+	Write-ColorInfo "Link: $($linkPath)" 'Green'
+	Write-ColorInfo ""
 
 	Show-List $lists.link    'Linking:'   'Blue'
 	Show-List $lists.include 'Including:' 'Green'
 	Show-List $lists.exclude 'Excluding:' 'Red'
 	Show-List $lists.avoid   'Avoiding:'  'Yellow'
 
-	Write-Information "`n" -InformationAction
+	Write-ColorInfo "`n"
 }
 
 function global:Show-List([hashtable[]] $list, [string] $label, [ConsoleColor] $color) {
 	if ($list.Length -gt 0) {
 		Write-ColorInfo $label
 		foreach ($profile in $lists.avoid) {
-			Write-ColorInfo ("    " + $profile.relPath) $color
+			Write-ColorInfo ('    ' + $profile.relPath) $color
 		}
 	}
 }
@@ -223,14 +222,14 @@ function global:New-Links([hashtable] $lists, [string] $sourcePath, [string] $li
 		$copyTargetDirPath = Split-Path $copyTargetPath
 		if (!(Test-Path $copyTargetDirPath)) {
 			if (!$whatIf) {
-				New-Item -Path (Split-Path $copyTargetDirPath) -Name (Split-Path $copyTargetDirPath -Leaf) -ItemType "directory" | Out-Null
+				New-Item -Path (Split-Path $copyTargetDirPath) -Name (Split-Path $copyTargetDirPath -Leaf) -ItemType 'Directory' | Out-Null
 			}
 		}
 		$copyPath = $profile.file.FullName
 		if (!$whatIf) {
 			Copy-Item -Path $copyPath -Destination $copyTargetPath
 		}
-		Write-ColorInfo "`"$($copyPath)`" copied to `"$($copyTargetPath)`"." "Green" "Continue"
+		Write-ColorInfo "`"$($copyPath)`" copied to `"$($copyTargetPath)`"." 'Green'
 
 	}
 	foreach ($profile in $lists.link) {
@@ -238,17 +237,17 @@ function global:New-Links([hashtable] $lists, [string] $sourcePath, [string] $li
 		$targetPath = (Join-Path -Path $sourcePath -ChildPath $profile.relPath)
 
 		if ((Test-Path $linkItemPath)) {
-			if ((Get-Item $linkItemPath).LinkType -ne "SymbolicLink") {
+			if ((Get-Item $linkItemPath).LinkType -ne 'SymbolicLink') {
 				
 				if (!$whatIf) {
 					Remove-Item $linkItemPath -Recurse -Force
 					New-Item -ItemType SymbolicLink -Path $linkItemPath -Target $targetPath | Out-Null
 				}
 				
-				Write-ColorInfo "Symbolic link created at `"$($linkItemPath)`", linked to `"$($targetPath)`"." "Blue" "Continue"
+				Write-ColorInfo "Symbolic link created at `"$($linkItemPath)`", linked to `"$($targetPath)`"." 'Blue'
 			}
 			else {
-				Write-ColorInfo "`"$($linkItemPath)`" is already a symlink. Skipping." "Yellow" "Continue"
+				Write-ColorInfo "`"$($linkItemPath)`" is already a symlink. Skipping." 'Yellow'
 			}
 		}
 		else {
@@ -259,10 +258,10 @@ function global:New-Links([hashtable] $lists, [string] $sourcePath, [string] $li
 	}
 }
 
-function global:Write-ColorInfo([string] $message, [ConsoleColor] $color = "White", [string] $infoAction = "Continue") {
+function global:Write-ColorInfo([string] $message, [ConsoleColor] $color = 'White') {
 	$writeInfo = [HostInformationMessage]@{
 		Message         = $message
 		ForegroundColor = $color
 	}
-	Write-Information $writeInfo -InformationAction $infoAction
+	Write-Information $writeInfo -InformationAction "Continue"
 }
