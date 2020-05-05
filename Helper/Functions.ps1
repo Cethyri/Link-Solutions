@@ -16,7 +16,9 @@ function global:Test-SourcePath([string] $sourcePath) {
 
 function global:Test-LinkPath([string] $linkPath) {
 	if (!(Test-Path $linkPath)) {
+		if (!$whatIf) {
 		New-Item -ItemType SymbolicLink -Path $linkPath -Target $sourcePath
+		}
 		Write-ColorInfo "Symbolic link created at `"$($linkItemPath)`", linked to `"$($targetPath)`"." "Blue" "Continue"
 		return $false
 	}
@@ -192,10 +194,14 @@ function global:New-Links([hashtable] $lists, [string] $sourcePath, [string] $li
 		$copyTargetPath = Join-Path -Path $sourcePath -ChildPath $profile.relPath
 		$copyTargetDirPath = Split-Path $copyTargetPath
 		if (!(Test-Path $copyTargetDirPath)) {
+			if (!$whatIf) {
 			New-Item -Path (Split-Path $copyTargetDirPath) -Name (Split-Path $copyTargetDirPath -Leaf) -ItemType "directory" | Out-Null
 		}
+		}
 		$copyPath = $profile.file.FullName
+		if (!$whatIf) {
 		Copy-Item -Path $copyPath -Destination $copyTargetPath
+		}
 		Write-ColorInfo "`"$($copyPath)`" copied to `"$($copyTargetPath)`"." "Green" "Continue"
 
 	}
@@ -205,9 +211,11 @@ function global:New-Links([hashtable] $lists, [string] $sourcePath, [string] $li
 
 		if ((Test-Path $linkItemPath)) {
 			if ((Get-Item $linkItemPath).LinkType -ne "SymbolicLink") {
+				
+				if (!$whatIf) {
 				Remove-Item $linkItemPath -Recurse -Force
-
 				New-Item -ItemType SymbolicLink -Path $linkItemPath -Target $targetPath | Out-Null
+				}
 				
 				Write-ColorInfo "Symbolic link created at `"$($linkItemPath)`", linked to `"$($targetPath)`"." "Blue" "Continue"
 			}
@@ -216,9 +224,11 @@ function global:New-Links([hashtable] $lists, [string] $sourcePath, [string] $li
 			}
 		}
 		else {
+			if (!$whatIf) {
 			New-Item -ItemType SymbolicLink -Path $linkItemPath -Target $targetPath | Out-Null
 		}
 	}
+}
 }
 
 function global:Write-ColorInfo([string] $message, [ConsoleColor] $color, [string] $infoAction) {

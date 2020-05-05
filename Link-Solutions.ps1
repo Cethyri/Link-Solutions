@@ -1,8 +1,10 @@
-param ([string] $configFilePath)
+param ([string] $configFilePath, [switch] $whatIf)
 
 Import-Module .\Config\BaseConfig.ps1 -Force
 Import-Module $configFilePath -Force
 Import-Module .\Helper\Functions.ps1 -Force
+
+$global:whatIf = $whatIf
 
 if (!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
 {
