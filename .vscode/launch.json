@@ -10,7 +10,7 @@
 			"request": "launch",
 			"script": "${workspaceFolder}\\Link-Solutions.ps1",
 			"cwd": "${workspaceFolder}",
-			"args": [".\\Config\\EHBEPS\\Platform.ps1"]
+			"args": [".\\Config\\EHBEPS\\EPSCore.ps1", "-whatIf"]
 		}
 	]
 }
