@@ -1,6 +1,6 @@
 $global:config = @{
-	avoidByDefault     = $true
-	confirmBeforeLink  = $true
-	confirmResults     = $false
-	showSummary        = $true
+	avoidByDefault    = $true	#default: $true
+	confirmBeforeLink = $false	#default: $false
+	confirmResults    = $false	#default: $false
+	showSummary       = $true	#default: $true
 }
