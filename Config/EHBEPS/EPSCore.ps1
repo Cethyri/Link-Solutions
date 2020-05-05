@@ -1,6 +1,6 @@
 $config.sourceSolutionPath = "Y:\TFS\Enterprise-EPSCore\"
 $config.linkSolutionPath = "Y:\TFS\Enterprise-EHBEPS\"
-$config.syncProfiles = @(
+$config.linkProfiles = @(
 	@{
 		sourceChildPath = "WebEPSExternal"
 		linkChildPath   = "WebEPSExternal"

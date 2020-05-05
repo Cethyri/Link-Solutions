@@ -12,11 +12,11 @@ if (!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]
     break
 }
 
-foreach ($syncProfile in $config.syncProfiles) {
-	$sourcePath = Join-Path -Path $config.sourceSolutionPath -ChildPath $syncProfile.sourceChildPath
-	$linkPath = Join-Path -Path $config.linkSolutionPath -ChildPath $syncProfile.linkChildPath
-	$syncProfile.doFilter = ![string]::IsNullOrEmpty($syncProfile.filter)
-	$syncProfile.doAvoid = ![string]::IsNullOrEmpty($syncProfile.avoid)
+foreach ($linkProfile in $config.linkProfiles) {
+	$sourcePath = Join-Path -Path $config.sourceSolutionPath -ChildPath $linkProfile.sourceChildPath
+	$linkPath = Join-Path -Path $config.linkSolutionPath -ChildPath $linkProfile.linkChildPath
+	$linkProfile.doFilter = ![string]::IsNullOrEmpty($linkProfile.filter)
+	$linkProfile.doAvoid = ![string]::IsNullOrEmpty($linkProfile.avoid)
 	
 	if (!(Test-SourcePath $sourcePath) -or !(Test-LinkPath $linkPath)) {
 		continue
@@ -32,8 +32,8 @@ foreach ($syncProfile in $config.syncProfiles) {
 	$linkFiles = Get-ChildItem $linkPath
 	$linkRegexPath = $linkPath -replace '\\', '\\'
 	
-	Add-LinkProfiles $sourceFiles $linkProfiles $syncProfile.sourceChildPath $sourceRegexPath $syncProfile
-	Add-LinkProfiles $linkFiles $linkProfiles $syncProfile.linkChildPath $linkRegexPath $syncProfile $true
+	Add-LinkProfiles $sourceFiles $linkProfiles $linkProfile.sourceChildPath $sourceRegexPath $linkProfile
+	Add-LinkProfiles $linkFiles $linkProfiles $linkProfile.linkChildPath $linkRegexPath $linkProfile $true
 	$lists = @{ }
 
 	Show-Summary $linkProfiles $lists $sourcePath $linkPath $config.showSummary

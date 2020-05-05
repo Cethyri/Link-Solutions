@@ -38,8 +38,8 @@ function global:New-Profile ([System.IO.FileSystemInfo] $file, [string] $relPath
 	}
 }
 
-function global:Get-ShouldInclude ([System.IO.FileSystemInfo] $file, [bool] $isDirectory, [hashtable] $syncProfile, [LinkAction] $dirAction) {
-	$filter = !$syncProfile.doFilter -or $file.Name -like $syncProfile.filter
+function global:Get-ShouldInclude ([System.IO.FileSystemInfo] $file, [bool] $isDirectory, [hashtable] $linkProfile, [LinkAction] $dirAction) {
+	$filter = !$linkProfile.doFilter -or $file.Name -like $linkProfile.filter
 	$action = ($dirAction -ne [LinkAction]::exclude) -and ($dirAction -ne [LinkAction]::avoid)
 	return ($isDirectory -or $filter) -and $action
 }
@@ -88,7 +88,7 @@ function global:Read-LinkAction ([string] $fileName, [bool] $isDirectory) {
 	return $result
 }
 
-function global:Add-LinkProfiles ([System.IO.FileSystemInfo[]] $files, [hashtable] $linkProfiles, [string] $childPath, [string] $regexPath, [hashtable] $syncProfile, [bool] $inLinkDirectory = $false) {
+function global:Add-LinkProfiles ([System.IO.FileSystemInfo[]] $files, [hashtable] $linkProfiles, [string] $childPath, [string] $regexPath, [hashtable] $linkProfile, [bool] $inLinkDirectory = $false) {
 	for ($i = 0; $i -lt $files.Length; ++$i) {
 		$file = $files[$i]
 		$isDirectory = $file -is [System.IO.DirectoryInfo]
@@ -96,10 +96,11 @@ function global:Add-LinkProfiles ([System.IO.FileSystemInfo[]] $files, [hashtabl
 		$relPath = $file.FullName -replace $regexPath, ''
 		$relDirPath = Split-Path $relPath
 		
-		$include = Get-ShouldInclude $file $isDirectory $syncProfile $linkProfiles[$relDirPath].action
+		$include = Get-ShouldInclude $file $isDirectory $linkProfile $linkProfiles[$relDirPath].action
 		
 		if ($include) {
-			$avoid = $syncProfile.doAvoid -and $file.name -like $syncProfile.avoid
+			$avoid = $linkProfile.doAvoid -and $file.name -like $linkProfile.avoid
+
 			if ($avoid) {
 				$include = $false
 			}
