@@ -179,7 +179,7 @@ function global:Get-ActionLists([hashtable] $linkProfiles) {
 		}
 
 		$isTopAvoid = $linkProfiles[$relDirPath].fileCount -gt 0
-		$canAvoid = $profile.action -eq [LinkAction]::avoid -or $profile.action -eq [LinkAction]::none
+		$canAvoid = $profile.action -eq [LinkAction]::avoid -or ($profile.action -eq [LinkAction]::none -and $linkProfiles[$profile.relPath].fileCount -eq 0)
 		if ($canAvoid -and $isTopAvoid) {
 			$lists.avoid += $profile
 		}
@@ -210,7 +210,7 @@ function global:Show-Summary([hashtable] $lists, [string] $sourcePath, [string] 
 function global:Show-List([hashtable[]] $list, [string] $label, [ConsoleColor] $color) {
 	if ($list.Length -gt 0) {
 		Write-ColorInfo $label
-		foreach ($profile in $lists.avoid) {
+		foreach ($profile in $list) {
 			Write-ColorInfo ('    ' + $profile.relPath) $color
 		}
 	}
