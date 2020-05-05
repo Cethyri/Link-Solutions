@@ -6,7 +6,7 @@ Import-Module .\Helper\Functions.ps1 -Force
 
 $global:whatIf = $whatIf
 
-if (!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
+if (!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator") -and !$whatIf)
 {
     Write-Warning "You do not have Administrator rights to run this script! Please re-run this script as an Administrator!"
     break
