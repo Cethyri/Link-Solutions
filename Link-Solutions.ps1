@@ -18,7 +18,13 @@ foreach ($linkProfile in $config.linkProfiles) {
 	$linkProfile.doFilter = ![string]::IsNullOrEmpty($linkProfile.filter)
 	$linkProfile.doAvoid = ![string]::IsNullOrEmpty($linkProfile.avoid)
 	
-	if (!(Test-SourcePath $sourcePath) -or !(Test-LinkPath $linkPath)) {
+	Write-ColorInfo "----------Summary----------" 'Green'
+	Write-ColorInfo "Source: $($sourcePath)" 'Green'
+	Write-ColorInfo "Link: $($linkPath)" 'Green'
+	Write-ColorInfo ""
+
+	if (!((Test-SourcePath $sourcePath) -and (Test-LinkPath $linkPath $sourcePath))) {
+		Write-ColorInfo ""
 		continue
 	}
 	
@@ -47,4 +53,6 @@ foreach ($linkProfile in $config.linkProfiles) {
 			Read-Host -Prompt "Press a key to continue"
 		}
 	}
+
+	Write-ColorInfo ""
 }

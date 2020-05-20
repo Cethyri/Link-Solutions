@@ -14,12 +14,16 @@ function global:Test-SourcePath([string] $sourcePath) {
 	return $true
 }
 
-function global:Test-LinkPath([string] $linkPath) {
+function global:Test-LinkPath([string] $linkPath, [string] $sourcePath) {
 	if (!(Test-Path $linkPath)) {
 		if (!$whatIf) {
-			New-Item -ItemType SymbolicLink -Path $linkPath -Target $sourcePath
+			$linkCreated = New-Item -ItemType SymbolicLink -Path $linkPath -Target $sourcePath
 		}
-		Write-ColorInfo "Symbolic link created at `"$($linkItemPath)`", linked to `"$($targetPath)`"." 'Blue'
+		Write-ColorInfo "Symbolic link created at `"$($linkPath)`", linked to `"$($sourcePath)`"." 'Blue'
+		return $false
+	}
+ 	elseif ((Get-Item $linkPath).LinkType -eq 'SymbolicLink') {
+		Write-ColorInfo "`"$($linkPath)`" is already a symlink. Skipping." 'Yellow'
 		return $false
 	}
 	# else {
@@ -185,20 +189,15 @@ function global:Get-ActionLists([hashtable] $linkProfiles) {
 		}
 	}
 
-	$lists.link    = $lists.link    | Sort-Object { $_.relPath }
+	$lists.link = $lists.link | Sort-Object { $_.relPath }
 	$lists.include = $lists.include | Sort-Object { $_.relPath }
 	$lists.exclude = $lists.exclude | Sort-Object { $_.relPath }
-	$lists.avoid   = $lists.avoid   | Sort-Object { $_.relPath }
+	$lists.avoid = $lists.avoid | Sort-Object { $_.relPath }
 
 	return $lists
 }
 
 function global:Show-Summary([hashtable] $lists, [string] $sourcePath, [string] $linkPath) {
-	Write-ColorInfo "----------Summary----------" 'Green'
-	Write-ColorInfo "Source: $($sourcePath)" 'Green'
-	Write-ColorInfo "Link: $($linkPath)" 'Green'
-	Write-ColorInfo ""
-
 	Show-List $lists.link    'Linking:'   'Blue'
 	Show-List $lists.include 'Including:' 'Green'
 	Show-List $lists.exclude 'Excluding:' 'Red'
@@ -236,9 +235,8 @@ function global:New-Links([hashtable] $lists, [string] $sourcePath, [string] $li
 		$linkItemPath = (Join-Path -Path $linkPath -ChildPath $profile.relPath)
 		$targetPath = (Join-Path -Path $sourcePath -ChildPath $profile.relPath)
 
-		if ((Test-Path $linkItemPath)) {
+		if (Test-Path $linkItemPath) {
 			if ((Get-Item $linkItemPath).LinkType -ne 'SymbolicLink') {
-				
 				if (!$whatIf) {
 					Remove-Item $linkItemPath -Recurse -Force
 					New-Item -ItemType SymbolicLink -Path $linkItemPath -Target $targetPath | Out-Null
