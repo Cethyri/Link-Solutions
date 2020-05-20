@@ -80,40 +80,40 @@ There are two configuration files needed to run the **Link-Solutions.ps1** scrip
 ✅ - Link
 ❌ - No Link
 
-Source							Link
-│								❌├───bin						
-│								❌├───HealthCheck				
-├───Include						❌├───Include					
-│	│							❌│   ├───Common					
-│   ├───JavaScript				✅│   ├───JavaScript				
-│   └───nuget.ignore			✅│   └───nuget.ignore			
-├───Interface					❌├───Interface					
-│   │							❌│   ├───Common					
-│   ├───Dashboard				✅│   ├───Dashboard				
-│   ├───Favorites				✅│   ├───Favorites				
-│   ├───Organization			✅│   ├───Organization			
-│   ├───PendingTask				✅│   ├───PendingTask			
-│   ├───ScreenShare				✅│   ├───ScreenShare			
-│   ├───Training				✅│   ├───Training				
-│   ├───UserRegistration		✅│   ├───UserRegistration		
-│   ├───Dashboard.aspx			✅│   ├───Dashboard.aspx			
-│   ├───Dashboard.aspx.cs		✅│   ├───Dashboard.aspx.cs		
-│   ├───GuideMe.aspx			✅│   ├───GuideMe.aspx			
-│   ├───GuideMe.aspx.cs			✅│   ├───GuideMe.aspx.cs		
-│   ├───GuideMe.Config			✅│   ├───GuideMe.Config			
-│   ├───Home.aspx				✅│   ├───Home.aspx				
-│   ├───Home.aspx.cs			✅│   ├───Home.aspx.cs			
-│   └───Home.Config				✅│   └───Home.Config			
-│								❌├───Platform					
-├───WebControls					❌├───WebControls				
-│   │							❌│   ├───Common					
-│   ├───Organization			✅│   ├───Organization			
-│   └───UserRegistration		✅│   └───UserRegistration		
-│								❌├───default.config				
-│								❌├───Global.asax				
-│								❌├───packages.config			
-│								❌├───web.config					
-│								❌└───Global.asax				
+Source                          Link
+│                               ❌├───bin                        
+│                               ❌├───HealthCheck                
+├───Include                     ❌├───Include                    
+│    │                          ❌│   ├───Common                    
+│   ├───JavaScript              ✅│   ├───JavaScript                
+│   └───nuget.ignore            ✅│   └───nuget.ignore            
+├───Interface                   ❌├───Interface                    
+│   │                           ❌│   ├───Common                    
+│   ├───Dashboard               ✅│   ├───Dashboard                
+│   ├───Favorites               ✅│   ├───Favorites                
+│   ├───Organization            ✅│   ├───Organization            
+│   ├───PendingTask             ✅│   ├───PendingTask            
+│   ├───ScreenShare             ✅│   ├───ScreenShare            
+│   ├───Training                ✅│   ├───Training                
+│   ├───UserRegistration        ✅│   ├───UserRegistration        
+│   ├───Dashboard.aspx          ✅│   ├───Dashboard.aspx            
+│   ├───Dashboard.aspx.cs       ✅│   ├───Dashboard.aspx.cs        
+│   ├───GuideMe.aspx            ✅│   ├───GuideMe.aspx            
+│   ├───GuideMe.aspx.cs         ✅│   ├───GuideMe.aspx.cs        
+│   ├───GuideMe.Config          ✅│   ├───GuideMe.Config            
+│   ├───Home.aspx               ✅│   ├───Home.aspx                
+│   ├───Home.aspx.cs            ✅│   ├───Home.aspx.cs            
+│   └───Home.Config             ✅│   └───Home.Config            
+│                               ❌├───Platform                    
+├───WebControls                 ❌├───WebControls                
+│   │                           ❌│   ├───Common                    
+│   ├───Organization            ✅│   ├───Organization            
+│   └───UserRegistration        ✅│   └───UserRegistration        
+│                               ❌├───default.config                
+│                               ❌├───Global.asax                
+│                               ❌├───packages.config            
+│                               ❌├───web.config                    
+│                               ❌└───Global.asax                
 ```
 
 ## Important Notes
