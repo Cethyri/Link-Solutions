@@ -26,6 +26,5 @@ $config.linkProfiles = @(
 	@{
 		sourceChildPath = 'Config\Platform'
 		linkChildPath   = 'Config\Platform'
-		avoid			= '*.token'
 	}
 )
