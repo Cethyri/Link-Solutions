@@ -45,7 +45,7 @@ There are two configuration files needed to run the **Link-Solutions.ps1** scrip
 			`$true` shows the summary of files to be <u>linked</u>, <u>included</u>, <u>excluded</u>, or <u>avoided</u>.  
 			`$false` hides the summary.
 
-2. An additional config file is required for any two solutions you want to link. For example linking **EHBEPS** to **EPSCore** and linking **EHBEPS** to **Platform-Classic** requires two separate config files. This file must set the following variables:
+2. An additional config file is required for any two solutions you want to link. For example linking A to B and linking A to C requires two separate config files. This file must set the following variables:
 	
 	- `[string] $config.sourceSolutionPath`  
 		The directory path to the source code (dependancy) you want to link. This solution should "own" the files (.aspx, .cs, .dlls, etc.) you are linking.  
