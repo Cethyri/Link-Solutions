@@ -2,7 +2,7 @@
 
 ## Summary
 
-This project is intended to solve the problem of working on multiple files across multiple solutions. Specifically it was built for **EHBEPS** and **EPSCore**, but it can be expanded via config. The script uses <u>symbolic links</u> to ensure shared content is synced across every project. You could use this for working on webpages used as content in other projects, or syncing dlls immediatly after you build a dependancy.
+This project is intended to solve the problem of working on multiple files across multiple solutions. Specifically it was built for ~~REDACTED~~, but it can be expanded via config. The script uses <u>symbolic links</u> to ensure shared content is synced across every project. You could use this for working on webpages used as content in other projects, or syncing dlls immediatly after you build a dependancy.
 
 ## Running
 
@@ -49,11 +49,11 @@ There are two configuration files needed to run the **Link-Solutions.ps1** scrip
 	
 	- `[string] $config.sourceSolutionPath`  
 		The directory path to the source code (dependancy) you want to link. This solution should "own" the files (.aspx, .cs, .dlls, etc.) you are linking.  
-		ex: `"Y:\TFS\Enterprise-EPSCore\"`
+		ex: `"Y:\Solutions\My-Original-Solution"`
 
 	- `[string] $config.linkSolutionPath`  
 		The directory path to the solution which consumes the files you want linked. This solution should rely on the source solution as a dependancy for the linked .dlls or content.  
-		ex: `"Y:\TFS\Enterprise-EHBEPS\"`
+		ex: `"Y:\Solutions\My-New-Solution"`
 
 	- `[hashtable] $config.linkProfiles`  
 		A list of profiles for every directory or file that needs to be linked. Each profile contains:
@@ -64,11 +64,11 @@ There are two configuration files needed to run the **Link-Solutions.ps1** scrip
 
 		- `[string] linkChildPath`  
 			The path from the **link** solution to the directory or file to be linked.  
-			ex: `"WebEPSInternal\bin"`
+			ex: `"MyProject\bin"`
 
 		- `[string] filter`  
 			Files must match this filter statement to be linked, files that don't match will be <u>avoided</u>. Can be unset or blank to not use a filter.  
-			ex: `"REISys.EPS.*"`
+			ex: `"Web.Core.*"`
 
 		- `[string] avoid`  
 			Files matching this statement will be <u>avoided</u>. Can be unset or blank to not avoid any files.  
